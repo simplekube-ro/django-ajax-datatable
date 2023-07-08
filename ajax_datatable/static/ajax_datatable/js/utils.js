@@ -81,13 +81,16 @@ window.AjaxDatatableViewUtils = (function() {
     function _handle_column_filter(table, data, target) {
         var index = target.data('index');
         var value = target.val();
+        if (Array.isArray(value)) {
+            value = value.join('+')
+        }
 
         var column = table.api().column(index);
         var old_value = column.search();
         console.log('Request to search value %o in column %o (current value: %o)', value, index, old_value);
         if (value != old_value) {
-            console.log('searching ...');
-            column.search(value).draw();
+            console.log('searching for value %o', value);
+            column.search(value ? value : '', true, false).draw();
         }
         else {
             console.log('skipped');
@@ -136,7 +139,7 @@ window.AjaxDatatableViewUtils = (function() {
                         if ('choices' in item && item.choices) {
 
                             // See: https://www.datatables.net/examples/api/multi_filter_select.html
-                            var select = $('<select data-index="' + index.toString() + '"><option value=""></option></select>');
+                            var select = $('<select id="' + item.name + '" data-index="' + index.toString() + '" class="select2" data-placeholder="' + item.title + '"><option value=""></option></select>');
                             $(item.choices).each(function(index, choice) {
                                 var option = $("<option>").attr('value', choice[0]).text(choice[1]);
                                 if (choice[0] === item.initialSearchValue) {
@@ -144,7 +147,7 @@ window.AjaxDatatableViewUtils = (function() {
                                 }
                                 select.append(option);
                             });
-                            html = $('<div>').append(select).html();
+                            html = $('<div class="mb-3">').append(select).html();
                         }
                         else {
                             var input = $('<input>')
